@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -15,7 +16,7 @@ func main() {
 	// create a channel to indicate when a user wants to quit
 	doneChan := make(chan bool)
 	// start a go routine to read user input and run program
-	go readUserInput(doneChan)
+	go readUserInput(os.Stdin, doneChan)
 	//block until the doneChan gets a value
 	<-doneChan
 	// close the channel
@@ -35,8 +36,8 @@ func prompt() {
 	fmt.Print("-> ")
 }
 
-func readUserInput(doneChan chan bool) {
-	scanner := bufio.NewScanner(os.Stdin)
+func readUserInput(in io.Reader, doneChan chan bool) {
+	scanner := bufio.NewScanner(in)
 
 	for {
 		res, done := checkNumbers(scanner)
