@@ -19,7 +19,7 @@ func isPrime(n int) (bool, string) {
 	}
 
 	if n < 0 {
-		return false, fmt.Sprintf("negative numbers are not prime by definition")
+		return false, "negative numbers are not prime by definition"
 	}
 
 	for i := 2; i <= n/2; i++ {
