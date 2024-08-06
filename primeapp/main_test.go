@@ -8,11 +8,11 @@ var primeTests = []struct {
 	expected bool
 	msg      string
 }{
-	{name: "prime-7", testNum: 7, expected: true, msg: "7 is a prime number"},
-	{name: "prime-4", testNum: 4, expected: false, msg: "4 is not a prime number because it is divisible by 2"},
-	{name: "prime-573", testNum: 573, expected: false, msg: "573 is not a prime number because it is divisible by 3"},
-	{name: "prime-0", testNum: 0, expected: false, msg: "0 is not prime by definition"},
-	{name: "prime--10", testNum: -10, expected: false, msg: "negative numbers are not prime by definition"},
+	{name: "prime:7", testNum: 7, expected: true, msg: "7 is a prime number"},
+	{name: "prime:4", testNum: 4, expected: false, msg: "4 is not a prime number because it is divisible by 2"},
+	{name: "prime:573", testNum: 573, expected: false, msg: "573 is not a prime number because it is divisible by 3"},
+	{name: "prime:0", testNum: 0, expected: false, msg: "0 is not prime by definition"},
+	{name: "prime:-10", testNum: -10, expected: false, msg: "negative numbers are not prime by definition"},
 }
 
 func Test_isPrime(t *testing.T) {
