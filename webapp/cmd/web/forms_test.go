@@ -47,3 +47,28 @@ func Test_form_required(t *testing.T) {
 	}
 
 }
+
+func Test_form_check(t *testing.T) {
+	form := NewForm(nil)
+	form.Check(false, "password", "password is required")
+
+	if form.Valid() {
+		t.Error("valid returns true and it should be false when calling check")
+	}
+
+}
+
+func Test_form_ErrorGet(t *testing.T) {
+	form := NewForm(nil)
+	form.Check(false, "password", "password is required")
+
+	s := form.Errors.Get("password")
+	if len(s) == 0 {
+		t.Error("should have an error and don't")
+	}
+
+	s = form.Errors.Get("userName")
+	if len(s) != 0 {
+		t.Error("have error when we shouldnt")
+	}
+}
