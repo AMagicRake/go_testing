@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -36,4 +39,53 @@ func Test_application_home(t *testing.T) {
 		}
 	}
 
+}
+
+var homeTests = []struct {
+	name         string
+	putInSession string
+	expectedHTML string
+}{
+	{name: "first visit", putInSession: "", expectedHTML: "<small>From Session:"},
+	{name: "second visit", putInSession: "hello, world!", expectedHTML: "<small>From Session: hello, world!"},
+}
+
+func TestAppHome(t *testing.T) {
+	for _, e := range homeTests {
+		req, _ := http.NewRequest("GET", "/", nil)
+		req = addContextAndSessionToRequest(req, app)
+		_ = app.Session.Destroy(req.Context())
+
+		if e.putInSession != "" {
+			app.Session.Put(req.Context(), "test", e.putInSession)
+		}
+
+		rr := httptest.NewRecorder()
+
+		handler := http.HandlerFunc(app.Home)
+
+		handler.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("%s: returned wrong status code expected 2-- but got %d", e.name, rr.Code)
+		}
+
+		body, _ := io.ReadAll(rr.Body)
+
+		if !strings.Contains(string(body), e.expectedHTML) {
+			t.Errorf("%s: did not find correct text in HTML, expected %s", e.name, e.expectedHTML)
+		}
+	}
+}
+
+func getCtx(req *http.Request) context.Context {
+	return context.WithValue(req.Context(), contextUserKey, "unknown")
+}
+
+func addContextAndSessionToRequest(req *http.Request, app application) *http.Request {
+	req = req.WithContext(getCtx(req))
+
+	ctx, _ := app.Session.Load(req.Context(), req.Header.Get("X-Session"))
+
+	return req.WithContext(ctx)
 }

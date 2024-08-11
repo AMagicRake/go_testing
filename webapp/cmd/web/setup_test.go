@@ -9,5 +9,7 @@ var app application
 
 func TestMain(m *testing.M) {
 
+	app.Session = getSession()
+
 	os.Exit(m.Run())
 }
