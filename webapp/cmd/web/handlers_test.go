@@ -27,7 +27,6 @@ func Test_application_home(t *testing.T) {
 	defer ts.Close()
 
 	//range through the test data
-	pathToTemplates = "./../../templates"
 	for _, e := range pageTests {
 		resp, err := ts.Client().Get(ts.URL + e.url)
 		if err != nil {
@@ -75,6 +74,20 @@ func TestAppHome(t *testing.T) {
 		if !strings.Contains(string(body), e.expectedHTML) {
 			t.Errorf("%s: did not find correct text in HTML, expected %s", e.name, e.expectedHTML)
 		}
+	}
+}
+
+func TestApp_renderWithBadTemplate(t *testing.T) {
+	// set template path to a location with a bad template
+	pathToTemplates = "./testdata/"
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req = addContextAndSessionToRequest(req, app)
+	rr := httptest.NewRecorder()
+
+	err := app.render(rr, req, "bad.page.gohtml", &TemplateData{})
+	if err == nil {
+		t.Error("expected error and got none")
 	}
 }
 
