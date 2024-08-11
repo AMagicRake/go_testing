@@ -17,7 +17,6 @@ var pageTests = []struct {
 
 func Test_application_home(t *testing.T) {
 
-	app := &application{}
 	routes := app.routes()
 
 	//spawn test http server

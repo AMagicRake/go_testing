@@ -18,7 +18,6 @@ var registered = []struct {
 }
 
 func Test_application_routes(t *testing.T) {
-	app := &application{}
 
 	mux := app.routes()
 

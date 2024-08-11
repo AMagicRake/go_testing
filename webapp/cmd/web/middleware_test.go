@@ -21,8 +21,6 @@ var contextTests = []struct {
 
 func Test_application_addIPToContext(t *testing.T) {
 
-	app := &application{}
-
 	// createa dummy handler that we'll use to checkthe context
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//make sure that the value exists in the context
@@ -64,7 +62,6 @@ func Test_application_addIPToContext(t *testing.T) {
 }
 
 func Test_application_ipFromContext(t *testing.T) {
-	app := &application{}
 
 	testValue := "1.1.1.1"
 	ctx := context.WithValue(context.Background(), contextUserKey, testValue)
