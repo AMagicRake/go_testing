@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -103,4 +104,76 @@ func addContextAndSessionToRequest(req *http.Request, app application) *http.Req
 	ctx, _ := app.Session.Load(req.Context(), req.Header.Get("X-Session"))
 
 	return req.WithContext(ctx)
+}
+
+var loginTests = []struct {
+	name               string
+	postedData         url.Values
+	expectedStatusCode int
+	expectedLoc        string
+}{
+	{
+		name: "valid login",
+		postedData: url.Values{
+			"email":    {"admin@example.com"},
+			"password": {"secret"},
+		},
+		expectedStatusCode: http.StatusSeeOther,
+		expectedLoc:        "/user/profile",
+	},
+	{
+		name: "missing form data",
+		postedData: url.Values{
+			"email":    {""},
+			"password": {""},
+		},
+		expectedStatusCode: http.StatusSeeOther,
+		expectedLoc:        "/",
+	},
+	{
+		name: "bad credentials",
+		postedData: url.Values{
+			"email":    {"admin_bad@example.com"},
+			"password": {"password"},
+		},
+		expectedStatusCode: http.StatusSeeOther,
+		expectedLoc:        "/",
+	},
+	{
+		name: "invalid credentials",
+		postedData: url.Values{
+			"email":    {"admin@example.com"},
+			"password": {"password"},
+		},
+		expectedStatusCode: http.StatusSeeOther,
+		expectedLoc:        "/",
+	},
+}
+
+func Test_app_login(t *testing.T) {
+	for _, e := range loginTests {
+		req, _ := http.NewRequest("POST", "/login", strings.NewReader(e.postedData.Encode()))
+		req = addContextAndSessionToRequest(req, app)
+		req.Header.Set("content-type", "application/x-www-form-urlencoded")
+
+		rr := httptest.NewRecorder()
+
+		handler := http.HandlerFunc(app.Login)
+
+		handler.ServeHTTP(rr, req)
+
+		if rr.Code != e.expectedStatusCode {
+			t.Errorf("%s: returned wrong status code, expected %d but got %d", e.name, e.expectedStatusCode, rr.Code)
+		}
+
+		actualLoc, err := rr.Result().Location()
+		if err == nil {
+			if actualLoc.String() != e.expectedLoc {
+				t.Errorf("%s: expected location %s, but got %s", e.name, e.expectedLoc, actualLoc.String())
+			}
+		} else {
+			t.Errorf("%s: no location header set", e.name)
+		}
+
+	}
 }
