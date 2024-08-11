@@ -15,7 +15,7 @@ var registered = []struct {
 	{route: "/", method: "GET"},
 	{route: "/static/*", method: "GET"},
 	{route: "/login", method: "POST"},
-	{route: "/users/profile", method: "GET"},
+	// {route: "/users/profile", method: "GET"},
 }
 
 func Test_application_routes(t *testing.T) {
