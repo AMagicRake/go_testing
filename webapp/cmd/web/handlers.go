@@ -14,6 +14,7 @@ import (
 )
 
 var pathToTemplates = "./templates/"
+var pathToUploads = "./static/img"
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	td := make(map[string]any)
@@ -125,7 +126,7 @@ func (app *application) authenticate(r *http.Request, user *data.User, password 
 
 func (app *application) UploadProfilePicture(w http.ResponseWriter, r *http.Request) {
 	// call a function that extracts the file form and upload
-	uploads, err := app.UploadFiles(r, "./static/img")
+	uploads, err := app.UploadFiles(r, pathToUploads)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

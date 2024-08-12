@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"webapp/pkg/data"
 )
 
 var pageTests = []struct {
@@ -260,6 +262,8 @@ func Test_app_UploadFiles(t *testing.T) {
 
 	// cleanup
 	_ = os.Remove(fmt.Sprintf("./testdata/uploads/%s", uploadedFiles[0].OriginalFileName))
+
+	wg.Wait()
 }
 
 func simulatePNGUpload(fileToUpload string, writer *multipart.Writer, t *testing.T, wg *sync.WaitGroup) {
@@ -292,4 +296,49 @@ func simulatePNGUpload(fileToUpload string, writer *multipart.Writer, t *testing
 		t.Error(err)
 	}
 
+}
+
+func Test_app_UploadProfilePicture(t *testing.T) {
+	pathToUploads = "./testdata/uploads"
+	filePath := "./testdata/img.png"
+
+	fieldName := "file"
+
+	body := new(bytes.Buffer)
+
+	mw := multipart.NewWriter(body)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := mw.CreateFormFile(fieldName, filePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := io.Copy(w, file); err != nil {
+		t.Fatal(err)
+	}
+
+	mw.Close()
+
+	req := httptest.NewRequest("POST", "/", body)
+	req = addContextAndSessionToRequest(req, app)
+
+	app.Session.Put(req.Context(), "user", data.User{ID: 1})
+	req.Header.Add("Content-Type", mw.FormDataContentType())
+
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(app.UploadProfilePicture)
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusSeeOther {
+		t.Errorf("wrong status code: %d", rr.Code)
+	}
+
+	_ = os.Remove("./testdata/upload/img.png")
 }
