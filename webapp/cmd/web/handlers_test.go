@@ -3,11 +3,18 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
+	"image"
+	"image/png"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -219,4 +226,70 @@ func Test_app_login(t *testing.T) {
 		}
 
 	}
+}
+
+func Test_app_UploadFiles(t *testing.T) {
+	// set up pipes
+	pr, pw := io.Pipe()
+
+	// create new writer for *io.Writer
+	writer := multipart.NewWriter(pw)
+
+	// create a wg
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
+
+	// run go routine to simulate uploading file
+	go simulatePNGUpload("./testdata/img.png", writer, t, wg)
+
+	// read from pipe
+	req := httptest.NewRequest("POST", "/", pr)
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+
+	// call uploadfiles
+	uploadedFiles, err := app.UploadFiles(req, "./testdata/uploads/")
+	if err != nil {
+		t.Error(err)
+	}
+
+	// perform tests
+	if _, err := os.Stat(fmt.Sprintf("./testdata/uploads/%s", uploadedFiles[0].OriginalFileName)); err != nil {
+		t.Errorf("file failed to upload: %s", err.Error())
+	}
+
+	// cleanup
+	_ = os.Remove(fmt.Sprintf("./testdata/uploads/%s", uploadedFiles[0].OriginalFileName))
+}
+
+func simulatePNGUpload(fileToUpload string, writer *multipart.Writer, t *testing.T, wg *sync.WaitGroup) {
+	defer writer.Close()
+	defer wg.Done()
+
+	// create form data field file with value being filename
+
+	part, err := writer.CreateFormFile("file", path.Base(fileToUpload))
+	if err != nil {
+		t.Error(err)
+	}
+
+	// open actual file
+	file, err := os.Open(fileToUpload)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	//decode the image
+	img, _, err := image.Decode(file)
+	if err != nil {
+		t.Error("error decoding image:", err)
+	}
+
+	//write the png to the pipe
+	err = png.Encode(part, img)
+	if err != nil {
+		t.Error(err)
+	}
+
 }
