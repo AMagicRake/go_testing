@@ -6,7 +6,8 @@ import (
 	"log"
 	"net/http"
 	"webapp/pkg/data"
-	"webapp/pkg/db"
+	"webapp/pkg/repository"
+	"webapp/pkg/repository/dbrepo"
 
 	"github.com/alexedwards/scs/v2"
 )
@@ -14,7 +15,7 @@ import (
 type application struct {
 	Session *scs.SessionManager
 	DSN     string
-	DB      db.PostgresConn
+	DB      repository.DatabaseRepo
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 	defer conn.Close()
 
-	app.DB = db.PostgresConn{DB: conn}
+	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
 
 	app.Session = getSession()
 
