@@ -340,5 +340,5 @@ func Test_app_UploadProfilePicture(t *testing.T) {
 		t.Errorf("wrong status code: %d", rr.Code)
 	}
 
-	_ = os.Remove("./testdata/upload/img.png")
+	_ = os.Remove("./testdata/uploads/img.png")
 }

@@ -65,13 +65,13 @@ func (m *PostgresDBRepo) GetUser(id int) (*data.User, error) {
 	defer cancel()
 
 	query := `
-		select 
+		select
 			u.id, u.email, u.first_name, u.last_name, u.password, u.is_admin, u.created_at, u.updated_at,
-			coalesce(ui.file_name, '') 
-		from 
+			coalesce(ui.file_name, '')
+		from
 			users u
 			left join user_images ui on (ui.user_id = u.id)
-		where 
+		where
 		    u.id = $1`
 
 	var user data.User
@@ -102,13 +102,13 @@ func (m *PostgresDBRepo) GetUserByEmail(email string) (*data.User, error) {
 	defer cancel()
 
 	query := `
-		select 
+		select
 			u.id, u.email, u.first_name, u.last_name, u.password, u.is_admin, u.created_at, u.updated_at,
-			coalesce(ui.file_name, '')  
-		from 
+			coalesce(ui.file_name, '')
+		from
 			users u
 			left join user_images ui on (ui.user_id = u.id)
-		where 
+		where
 		    u.email = $1`
 
 	var user data.User

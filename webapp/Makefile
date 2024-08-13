@@ -1,3 +1,3 @@
 test-coverage:
-	go test -coverprofile=coverage.out ./cmd/web
+	go test -coverprofile=coverage.out --tags=integration ./cmd/... ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
