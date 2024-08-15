@@ -17,28 +17,28 @@ func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
 	//read a json payload
 	err := app.readJSON(w, r, &creds)
 	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized 1"), http.StatusUnauthorized)
+		app.errorJSON(w, errors.New("unauthorized"), http.StatusUnauthorized)
 		return
 	}
 
 	//look up the user by email address
 	user, err := app.DB.GetUserByEmail(creds.UserName)
 	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized 2"), http.StatusUnauthorized)
+		app.errorJSON(w, errors.New("unauthorized"), http.StatusUnauthorized)
 		return
 	}
 
 	//check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
 	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized 3"), http.StatusUnauthorized)
+		app.errorJSON(w, errors.New("unauthorized"), http.StatusUnauthorized)
 		return
 	}
 
 	//generate tokens
 	tokenPairs, err := app.generateTokenPair(user)
 	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized 4"), http.StatusUnauthorized)
+		app.errorJSON(w, errors.New("unauthorized"), http.StatusUnauthorized)
 		return
 	}
 

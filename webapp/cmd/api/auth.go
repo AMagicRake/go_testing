@@ -24,7 +24,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (app *application) getTokenFromHeaderandVerify(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
+func (app *application) getTokenFromHeaderAndVerify(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
 	// add a header
 	w.Header().Add("Vary", "Authorization")
 
@@ -39,7 +39,7 @@ func (app *application) getTokenFromHeaderandVerify(w http.ResponseWriter, r *ht
 	// split the header on spaces
 	headerParts := strings.Split(authHeader, " ")
 
-	if len(headerParts) == 2 {
+	if len(headerParts) != 2 {
 		return "", nil, errors.New("invalid auth header")
 	}
 
